@@ -1,0 +1,142 @@
+<?php
+session_start();
+?>
+<!DOCTYPE html>
+<html>
+<title>
+ADVANCED-SEARCH
+</title>
+<head>
+<script type="text/javascript" src="advancedsearch.js"></script>
+<style> 
+ ul { list-style-type:none; margin:0; padding:0; overflow:hidden; } li { float:left; } a:link,a:visited { display:block; width:120px; font-weight:bold; color:#FFFFFF; background-color:#98bf21; text-align:center; padding:4px; text-decoration:none; text-transform:uppercase; } a:hover,a:active { background-color:#7A991A; }
+ </style>
+</head>
+<body background="background1.jpg">
+<img src="qf.jpg">
+<form method="post" ACTION="search.php"><pre><input type="text" name="item" size="30"><input type="submit" name="search" value="SEARCH"></pre>
+<input type="hidden" name="n" id="n" value="<?php print $n; ?>" size="5"></form>
+
+ <ul>
+ <li><a href="mainpage.php">HOME</a></li>
+ <li><a href="login.php">LOGIN</a></li>
+ <li><a href="register.php">SIGNUP</a></li>
+ <li><a href="contact.php">CONTACT</a></li>
+ <li><a href="about.php">ABOUT</a></li> 
+ </ul>
+<?php
+error_reporting(0);
+include('class.pdf2text.php');
+$a=new PDF2Text();
+$z=0;
+$o=1;
+$_SESSION['page']="searchview.php";
+$item=null;
+if(isset($_POST['search']))
+{
+$item=$_POST['item'];
+$n=$_POST['n'];
+}
+else
+{
+$item=$_SESSION['item'];
+$n=$_SESSION['n'];
+session_unset();
+session_destroy();
+}
+$page="searchview.php";
+
+if(isset($_POST['prev']))
+{
+$item=$_POST['item'];
+$n=$_POST['n'];
+$c=$_POST['p'];
+$n=$n-(3+$c);
+if($n<0)
+{
+$n=0;
+}
+}
+
+$user_name="root";
+$password="";
+$database="project1";
+$server = "127.0.0.1";
+$db_handle=mysql_connect($server,$user_name,$password);
+$db_found=mysql_select_db($database,$db_handle);
+if($db_found)
+{
+$sql="select * from files where files.subject='".$item."'";
+$result=mysql_query($sql);
+$db=mysql_fetch_assoc($result);
+$q=$n;
+while($q>0)
+{
+$db=mysql_fetch_assoc($result);
+--$q;
+}
+while($db['filename']!=null&&$z!=3)
+{
+?>
+
+
+<p style="text-decoration:none;font-size:27px;color:#4169E1;"><b><?php
+print ucfirst($db['subject'])." "."B.Tech ".$db['semester']." semester "." ".strtoupper($db['branch'])." ".$db['year']." ".ucfirst($db['university'])." university"; 
+?></b></p>
+<form action="view1.php" method="post" name="v">
+<ul>
+<li>
+<input type="submit" name="v" id="v" value="VIEW" size="5"></li>
+ <li><pre style="text-decoration:none;font-size:15px;color:green;">   <?php
+print $db['filename']; 
+?></pre></li> 
+ </ul>
+<input type="hidden" name="f" id="f" value="<?php print $db['filename']; ?>" size="5">
+<input type="hidden" name="item" id="item" value="<?php print $item; ?>" size="5">
+<input type="hidden" name="n" id="n" value="<?php print $n; ?>" size="5">
+<input type="hidden" name="p" id="p" value="<?php print $page; ?>" size="5">
+</form>
+</td>
+<td><?php
+
+?>
+
+<?php
+$db=mysql_fetch_assoc($result);
+++$z;	
+}
+
+
+
+if($db['filename']==null)
+{
+$o=null;
+}
+?>
+<br><br>
+<?php
+$n=$n+$z;
+?>
+<form action="searchview.php" method="POST">
+<ul>
+ <li><pre>                                                                                 </pre></li>
+<?php if(($n-$z)!=0){?><li><input type="submit" name="prev" id="prev" value="Prev"size="30"></li><?php }?>
+ <li><pre>        </pre></li>
+<?php if($o!=null){?><li><input type="submit" name="search" id="search" value="Next"size="30"></li><?php }?>
+</ul>
+<input type="hidden" name="item" id="item" value="<?php print $item; ?>" size="5">
+<input type="hidden" name="n" id="n" value="<?php print $n; ?>" size="5">
+
+<input type="hidden" name="p" id="p" value="<?php print $z; ?>" size="5">
+</form>
+
+<?php
+
+}
+
+
+
+
+?>
+</body>
+</html>
